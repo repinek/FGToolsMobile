@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34607.119
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NOTFGTools", "NOTFGTools.csproj", "{788BC472-59F7-46F6-B760-65C18BA74389}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NOTFGTools", "Src\NOTFGTools.csproj", "{788BC472-59F7-46F6-B760-65C18BA74389}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -2,16 +2,11 @@
 using FGClient.UI;
 using NOTFGT.Localization;
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using UnityEngine;
 using static FGClient.UI.UIModalMessage;
-using static UnityEngine.UI.CanvasScaler;
 
 namespace NOTFGT.Logic
 {

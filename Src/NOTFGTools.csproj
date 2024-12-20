@@ -34,112 +34,112 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
-      <HintPath>Lib\0Harmony.dll</HintPath>
+      <HintPath>..\Lib\0Harmony.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Il2Cppmscorlib">
-      <HintPath>Lib\Il2Cppmscorlib.dll</HintPath>
+      <HintPath>..\Lib\Il2Cppmscorlib.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="MelonLoader">
-      <HintPath>Lib\MelonLoader.dll</HintPath>
+      <HintPath>..\Lib\MelonLoader.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="MT.FGClient">
-      <HintPath>Lib\MT.FGClient.dll</HintPath>
+      <HintPath>..\Lib\MT.FGClient.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="mvvmbindings">
-      <HintPath>Lib\mvvmbindings.dll</HintPath>
+      <HintPath>..\Lib\mvvmbindings.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json">
-      <HintPath>Lib\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\Lib\Newtonsoft.Json.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="ParsingUtils_Runtime">
-      <HintPath>Lib\ParsingUtils_Runtime.dll</HintPath>
+      <HintPath>..\Lib\ParsingUtils_Runtime.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Json">
-      <HintPath>Lib\System.Json.dll</HintPath>
+      <HintPath>..\Lib\System.Json.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="TheMultiplayerGuys.FGCommon">
-      <HintPath>Lib\TheMultiplayerGuys.FGCommon.dll</HintPath>
+      <HintPath>..\Lib\TheMultiplayerGuys.FGCommon.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="TheMultiplayerGuys.Utility">
-      <HintPath>Lib\TheMultiplayerGuys.Utility.dll</HintPath>
+      <HintPath>..\Lib\TheMultiplayerGuys.Utility.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnhollowerBaseLib">
-      <HintPath>Lib\UnhollowerBaseLib.dll</HintPath>
+      <HintPath>..\Lib\UnhollowerBaseLib.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UniRx">
-      <HintPath>Lib\UniRx.dll</HintPath>
+      <HintPath>..\Lib\UniRx.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.Addressables">
-      <HintPath>Lib\Unity.Addressables.dll</HintPath>
+      <HintPath>..\Lib\Unity.Addressables.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.InputSystem">
-      <HintPath>Lib\Unity.InputSystem.dll</HintPath>
+      <HintPath>..\Lib\Unity.InputSystem.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.ResourceManager">
-      <HintPath>Lib\Unity.ResourceManager.dll</HintPath>
+      <HintPath>..\Lib\Unity.ResourceManager.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.TextMeshPro">
-      <HintPath>Lib\Unity.TextMeshPro.dll</HintPath>
+      <HintPath>..\Lib\Unity.TextMeshPro.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine">
-      <HintPath>Lib\UnityEngine.dll</HintPath>
+      <HintPath>..\Lib\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.AssetBundleModule">
-      <HintPath>Lib\UnityEngine.AssetBundleModule.dll</HintPath>
+      <HintPath>..\Lib\UnityEngine.AssetBundleModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>Lib\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>..\Lib\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.ImageConversionModule">
-      <HintPath>Lib\UnityEngine.ImageConversionModule.dll</HintPath>
+      <HintPath>..\Lib\UnityEngine.ImageConversionModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.IMGUIModule">
-      <HintPath>Lib\UnityEngine.IMGUIModule.dll</HintPath>
+      <HintPath>..\Lib\UnityEngine.IMGUIModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.InputLegacyModule">
-      <HintPath>Lib\UnityEngine.InputLegacyModule.dll</HintPath>
+      <HintPath>..\Lib\UnityEngine.InputLegacyModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.InputModule">
-      <HintPath>Lib\UnityEngine.InputModule.dll</HintPath>
+      <HintPath>..\Lib\UnityEngine.InputModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.PhysicsModule">
-      <HintPath>Lib\UnityEngine.PhysicsModule.dll</HintPath>
+      <HintPath>..\Lib\UnityEngine.PhysicsModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.TextRenderingModule">
-      <HintPath>Lib\UnityEngine.TextRenderingModule.dll</HintPath>
+      <HintPath>..\Lib\UnityEngine.TextRenderingModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>Lib\UnityEngine.UI.dll</HintPath>
+      <HintPath>..\Lib\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UIModule">
-      <HintPath>Lib\UnityEngine.UIModule.dll</HintPath>
+      <HintPath>..\Lib\UnityEngine.UIModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
