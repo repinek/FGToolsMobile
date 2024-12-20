@@ -169,8 +169,8 @@ namespace NOTFGT.Logic
                 Resources.FindObjectsOfTypeAll<PhysicsSimulator>().FirstOrDefault().ToggleRunningPhysicsAutomatically();
                 gameLoading._clientGameManager.SetReady(PlayerReadinessState.IntroComplete, null, null);
                 RoundLoader.RoundCamera?.SnapCameraNextFrame();
-                RoundLoader.RoundCamera.ForceRecenterToHeading();
-                RoundLoader.RoundCamera.AddCloseCameraTarget(FallGuyBehaviour.FGBehaviour.FallGuy, true);
+                RoundLoader.RoundCamera?.ForceRecenterToHeading();
+                RoundLoader.RoundCamera?.AddCloseCameraTarget(FallGuyBehaviour.FGBehaviour.FallGuy, true);
                 FallGuyBehaviour.FGBehaviour.FGCC.SetupOnClient(GlobalGameStateClient.Instance.NetObjectManager, FallGuyBehaviour.FGBehaviour.FGMPG);
                 RoundLoaderService.UIM.SwitchToState(InGameUiManager.InGameState.Countdown);
                 RoundLoaderService.CGM._gameSession.SetSessionState(GameSession.SessionState.Countdown);

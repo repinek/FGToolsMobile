@@ -33,6 +33,10 @@ bld/
 [Oo]utput/
 [Ll]og/
 [Ll]ogs/
+[Ll]ibrary
+[Tt]emp
+[Uu]ser[Ss]ettings
+[Aa]sset[Bb]undles
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
