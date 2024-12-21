@@ -37,7 +37,7 @@ namespace NOTFGT.GUI
 
     public class GUI_Util
     {
-        const string BundleName = "not_fgtoolsGUI";
+        const string BundleName = "not_fgtoolsgui";
 
         const string GitHub = "github.com/floyzi";
         const string Discord = "discord.gg/PEysxvSE3x";
@@ -711,14 +711,14 @@ namespace NOTFGT.GUI
                             Debug.LogWarning("");
 
                         slider.value = float.Parse(entry.Value.ToString());
-                        sliderValue.text = $"{Convert.ToInt32(entry.Value)} / {Convert.ToInt32(slider.maxValue)}";
+                        sliderValue.text = $"{entry.Value:F1} / {slider.maxValue:F1}";
 
 
                         slider.onValueChanged.AddListener(new Action<float>(act5));
                         void act5(float val)
                         {
                             NOTFGTools.Instance.SettingsMenu.UpdateValue(entry.InternalName, val);
-                            sliderValue.text = $"{Convert.ToInt32(val)} / {Convert.ToInt32(slider.maxValue)}";
+                            sliderValue.text = $"{val:F1} / {slider.maxValue:F1}";
                         }
                         break;
                     case MenuEntry.Type.Button:

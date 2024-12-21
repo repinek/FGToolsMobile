@@ -14,7 +14,7 @@
     { "Key": "init_fail_null_object", "Value": "GUI Object can't be found. Tried to find {0}" },
     { "Key": "gui_init_fail_generic_title", "Value": "Unable to create UI" },
     { "Key": "gui_init_fail_generic_desc", "Value": "Failed to create UI.\n{0}" },
-    { "Key": "cheat_entry_gui_title", "Value": "Enable GUI" },
+    { "Key": "cheat_entry_gui_title", "Value": "Enable Mod Debug" },
     { "Key": "cheat_entry_gui_desc", "Value": "" },
     { "Key": "cheat_entry_spectator_title", "Value": "Join as Spectator" },
     { "Key": "cheat_entry_spectator_desc", "Value": "" },
@@ -78,5 +78,7 @@
     { "Key": "fgcc_alert_title", "Value": "SMALL REMINDER" },
     { "Key": "fgcc_alert_desc", "Value": "You have edited character data!\nYour account most likely will get tempoary or permanently banned because this counts as cheating. Do you really want to continue?\n\nI'm not responsible for your actions, you know what you're doing!" },
     { "Key": "cheat_entry_force_menu_title", "Value": "Force Load Main Menu" },
-    { "Key": "cheat_entry_force_menu_desc", "Value": "reload game into main menu, use this if you softlocked..." }
+    { "Key": "cheat_entry_force_menu_desc", "Value": "reload game into main menu, use this if you softlocked..." },
+    { "Key": "cheat_entry_fg_debug_scale_title", "Value": "FG Debug Scale" },
+    { "Key": "cheat_entry_fg_debug_scale_desc", "Value": "" }
 ]
