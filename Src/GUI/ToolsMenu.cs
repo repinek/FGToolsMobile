@@ -12,14 +12,25 @@ namespace NOTFGT.GUI
 {
     public class ToolsMenu
     {
+        //name of config file
         const string TargetCfgName = "ConfigV2.json";
 
+        //sections
         const string FGCC_Cat = "menu_fgcc_section";
         const string FPS_Cat = "menu_fps_section";
         const string Def_Cat = "menu_section";
         const string Debug_Cat = "menu_debug_section";
         const string Gameplay_Cat = "menu_gp_section";
 
+        //slider config
+        public const string SliderMin = "sliderMin";
+        public const string SliderMax = "sliderMax";
+        public const string IsFloat = "isFloat";
+
+        //field config
+        public const string CharLimit = "charLimit";
+
+        //menu entries
         public const string GUI = "GUI";
         public const string JoinAsSpectator = "JoinAsSpectator";
         public const string UseCaptureTools = "UseCaptureTools";
@@ -44,27 +55,51 @@ namespace NOTFGT.GUI
         public const string ForceMenu = "ForceMenu";
         public const string FGDebugScale = "FGDebugScale";
 
-        private static readonly Dictionary<string, (string Category, string DisplayName, string Description, object Value, object[] AdditionalData, MenuEntry.Type ValueType)> EditableMenu = new()
+        private static readonly Dictionary<string, (string Category, string DisplayName, string Description, object Value, Dictionary<string, object> Config, MenuEntry.Type ValueType)> EditableMenu = new()
         {
             { GUI, (Def_Cat, "cheat_entry_gui_title", "cheat_entry_gui_desc", false, null, MenuEntry.Type.Bool) },
             { TrackGameDebug, (Debug_Cat, "cheat_entry_track_debug_title", "cheat_entry_track_debug_desc", false, null, MenuEntry.Type.Bool) },
             { FPSCoutner, (FPS_Cat, "cheat_entry_fps_counter_title", "cheat_entry_fps_counter_desc", true, null, MenuEntry.Type.Bool) },
             { WholeFGDebug, (Debug_Cat, "cheat_entry_fg_debug_title", "cheat_entry_fg_debug_desc", false, null, MenuEntry.Type.Bool) },
             { UnlockFPS, (FPS_Cat, "cheat_entry_unlock_fps_title", "cheat_entry_unlock_fps_desc", true, null, MenuEntry.Type.Bool) },
-            { TargetFPS, (FPS_Cat, "cheat_entry_target_fps_title", "cheat_entry_target_fps_desc", 60, new object[] { 3 }, MenuEntry.Type.Int) },
+            { TargetFPS, (FPS_Cat, "cheat_entry_target_fps_title", "cheat_entry_target_fps_desc", 60, new() {
+                { SliderMin, 1 },
+                { SliderMax, 300 },
+                { IsFloat, false },
+            }, MenuEntry.Type.Slider) },
             { Watermark, (Def_Cat, "cheat_entry_watermark_title", "cheat_entry_watermark_desc", true, null, MenuEntry.Type.Bool) },
-            { FGDebugScale, (Debug_Cat, "cheat_entry_fg_debug_scale_title", "cheat_entry_fg_debug_scale_desc", 0.602f, new object[] { 0f, 1f }, MenuEntry.Type.Slider) },
+            { FGDebugScale, (Debug_Cat, "cheat_entry_fg_debug_scale_title", "cheat_entry_fg_debug_scale_desc", 0.602f, new() {
+                { SliderMin, 0f },
+                { SliderMax, 1f },
+                { IsFloat, true }
+            }, MenuEntry.Type.Slider) },
 
 #if CHEATS
             { UseCaptureTools, (Def_Cat, "cheat_entry_capture_tools_title", "cheat_entry_capture_tools_desc", false, null, MenuEntry.Type.Bool) },
-            { RunSpeedModifier, (FGCC_Cat, "cheat_entry_run_speed_title", "cheat_entry_run_speed_desc", 0.0f, new object[] { 1f, 999f }, MenuEntry.Type.Slider) },
+            { RunSpeedModifier, (FGCC_Cat, "cheat_entry_run_speed_title", "cheat_entry_run_speed_desc", 0.0f, new() {
+               { SliderMin, 0f },
+               { SliderMax, 999f },
+               { IsFloat, true }
+            }, MenuEntry.Type.Slider) },
             { JumpYModifier, (FGCC_Cat, "cheat_entry_jump_y_title", "cheat_entry_jump_y_desc", 0.0f, null, MenuEntry.Type.Float) },
             { DiveSens, (FGCC_Cat, "cheat_entry_dive_sens_title", "cheat_entry_dive_sens_desc", 70.0f, null, MenuEntry.Type.Float) },
             { DisableMonitorCheck, (FGCC_Cat, "cheat_entry_fgcc_check_title", "cheat_entry_fgcc_check_desc", true, null, MenuEntry.Type.Bool) },
             { DisableAFK, (Gameplay_Cat, "cheat_entry_afk_title", "cheat_entry_afk_desc", false, null, MenuEntry.Type.Bool) },
-            { GravityChange, (FGCC_Cat, "cheat_entry_gravity_vel_title", "cheat_entry_gravity_vel_desc", 60f, new object[] { 0f, 100f }, MenuEntry.Type.Slider) },
-            { DiveForce, (FGCC_Cat, "cheat_entry_dive_force_title", "cheat_entry_dive_force_desc", 0.0f, new object[] { 1f, 999f }, MenuEntry.Type.Slider) },
-            { DiveInAirForce, (FGCC_Cat, "cheat_entry_air_dive_force_title", "cheat_entry_air_dive_force_desc", 0.0f, new object[] { 1f, 999f }, MenuEntry.Type.Slider) },
+            { GravityChange, (FGCC_Cat, "cheat_entry_gravity_vel_title", "cheat_entry_gravity_vel_desc", 60f, new() {
+               { SliderMin, 0f },
+               { SliderMax, 100f },
+               { IsFloat, true }
+            }, MenuEntry.Type.Slider) },
+            { DiveForce, (FGCC_Cat, "cheat_entry_dive_force_title", "cheat_entry_dive_force_desc", 16.5f, new() {
+                { SliderMin, 1f },
+                { SliderMax, 999f },
+                { IsFloat, true },
+            }, MenuEntry.Type.Slider) },
+            { DiveInAirForce, (FGCC_Cat, "cheat_entry_air_dive_force_title", "cheat_entry_air_dive_force_desc", 7.0f, new() {
+                { SliderMin, 1f },
+                { SliderMax, 999f },
+                { IsFloat, true },
+            }, MenuEntry.Type.Slider) },
             { JoinAsSpectator, (Def_Cat, "cheat_entry_spectator_title", "cheat_entry_spectator_desc", false, null, MenuEntry.Type.Bool) },
 #endif
         };
@@ -86,15 +121,15 @@ namespace NOTFGT.GUI
             public string DisplayName { get; set; }
             public string Description { get; set; } 
             public object Value { get; set; }
-            public object AdditionalData { get; set; }
+            public Dictionary<string, object> Config { get; set; }
             public Type ValueType { get; set; }
         }
 
-        public void LoadConfig()
+        public void LoadConfig(bool reset)
         {
             string path = Path.Combine(NOTFGTools.AssetsDir, TargetCfgName);
 
-            MelonLogger.Msg($"[{base.GetType()}] Loading config at path {path}");
+            MelonLogger.Msg($"[{base.GetType()}] Loading config at path {path}. Reset = {reset}");
             var definitions = new HashSet<string>
             {
                 GUI, TrackGameDebug, FPSCoutner, WholeFGDebug, UnlockFPS, TargetFPS, 
@@ -107,12 +142,15 @@ namespace NOTFGT.GUI
 
             };
 
-            if (!File.Exists(path))
+            _entries.Clear();
+            _changedEntries.Clear();
+
+            if (!File.Exists(path) || reset)
             {
                 MelonLogger.Msg($"[{base.GetType()}] Config not found, creating a new one...");
                 foreach (var entry in EditableMenu)
                 {
-                    RegisterEntry(entry.Key, entry.Value.Category, entry.Value.DisplayName, entry.Value.Description, entry.Value.Value, entry.Value.AdditionalData, entry.Value.ValueType);
+                    RegisterEntry(entry.Key, entry.Value.Category, entry.Value.DisplayName, entry.Value.Description, entry.Value.Value, entry.Value.Config, entry.Value.ValueType);
                 }
             }
             else
@@ -136,14 +174,14 @@ namespace NOTFGT.GUI
 
                     EditableMenu.TryGetValue(entry2, out var defaultEntry);
                     if (!knownDefinitions.ContainsKey(entry2))
-                        RegisterEntry(entry2, defaultEntry.Category, defaultEntry.DisplayName, defaultEntry.Description, defaultEntry.Value, defaultEntry.AdditionalData, defaultEntry.ValueType);
+                        RegisterEntry(entry2, defaultEntry.Category, defaultEntry.DisplayName, defaultEntry.Description, defaultEntry.Value, defaultEntry.Config, defaultEntry.ValueType);
                     else
                     {
                         var knownEntry = knownDefinitions[entry2];
                         if (knownEntry.ValueType == MenuEntry.Type.Button)
-                            RegisterEntry(knownEntry.InternalName, defaultEntry.Category, defaultEntry.DisplayName, defaultEntry.Description, defaultEntry.Value, defaultEntry.AdditionalData, defaultEntry.ValueType);
+                            RegisterEntry(knownEntry.InternalName, defaultEntry.Category, defaultEntry.DisplayName, defaultEntry.Description, defaultEntry.Value, defaultEntry.Config, defaultEntry.ValueType);
                         else
-                            RegisterEntry(knownEntry.InternalName, defaultEntry.Category, defaultEntry.DisplayName, defaultEntry.Description, knownEntry.Value, defaultEntry.AdditionalData, defaultEntry.ValueType);
+                            RegisterEntry(knownEntry.InternalName, defaultEntry.Category, defaultEntry.DisplayName, defaultEntry.Description, knownEntry.Value, defaultEntry.Config, defaultEntry.ValueType);
                     }
                 }
             }
@@ -168,11 +206,11 @@ namespace NOTFGT.GUI
 
         public void CreateStaticConfig()
         {
-            Dictionary<string, (string Category, string DisplayName, string Description, object Value, object[] AdditionalData, MenuEntry.Type ValueType)> StaticConfig = new()
+            Dictionary<string, (string Category, string DisplayName, string Description, object Value, Dictionary<string, object> AdditionalData, MenuEntry.Type ValueType)> StaticConfig = new()
             {
 #if CHEATS
                 { ToFinish, (Gameplay_Cat, "cheat_entry_to_finish_title", "cheat_entry_to_finish_desc", "TeleportToFinish", null, MenuEntry.Type.Button) },
-                { ToSafe, (Gameplay_Cat, "cheat_entry_to_safe_title", "cheat_entry_to_safe_desc", "ToSafeZone", null, MenuEntry.Type.Button) },
+                { ToSafe, (Gameplay_Cat, "cheat_entry_to_safe_title", "cheat_entry_to_safe_desc", "TeleportToSafeZone", null, MenuEntry.Type.Button) },
                 { ToRandomPlayer, (Gameplay_Cat, "cheat_entry_to_random_player_title", "cheat_entry_to_random_player_desc", "TeleportToRandomPlayer", null, MenuEntry.Type.Button) },
                 { HidePlayers, (Gameplay_Cat, "cheat_entry_toggle_players_title", "cheat_entry_toggle_players_desc", "TogglePlayers", null, MenuEntry.Type.Button) },
 #endif
@@ -196,15 +234,17 @@ namespace NOTFGT.GUI
             MelonLogger.Msg($"[{base.GetType()}] Saved config...");
         }
 
-        public void RegisterEntry(string internalName, string category, string displayName, string desc, object value, object AdditionalData, MenuEntry.Type type)
+        public void RegisterEntry(string internalName, string category, string displayName, string desc, object value, Dictionary<string, object> AdditionalData, MenuEntry.Type type)
         {
+            MelonLogger.Msg($"[{base.GetType()}] Register for entry \"{internalName}\" with type \"{type}\"");
+
             _entries.Add(new MenuEntry {
                 InternalName = internalName, 
                 Category = category, 
                 DisplayName = displayName, 
                 Description = desc,
                 Value = value, 
-                AdditionalData = AdditionalData,
+                Config = AdditionalData,
                 ValueType = type 
             });
         }
@@ -225,7 +265,7 @@ namespace NOTFGT.GUI
                         InternalName = entry.InternalName,
                         Description = entry.Description,
                         DisplayName= entry.DisplayName,
-                        AdditionalData = entry.AdditionalData,
+                        Config = entry.Config,
                         Category = entry.Category,
                         ValueType = entry.ValueType,
                         Value = value,
@@ -244,29 +284,47 @@ namespace NOTFGT.GUI
             {
                 var entry = _entries.FirstOrDefault(e => e.InternalName == changedEntry.InternalName);
 
+                if (changedEntry.InternalName == ToolsMenu.WholeFGDebug && (bool)changedEntry.Value)
+                    _entries.Find(x => x.InternalName == FPSCoutner).Value = false;
+
+                if (changedEntry.InternalName == ToolsMenu.FPSCoutner && (bool)changedEntry.Value)
+                    _entries.Find(x => x.InternalName == WholeFGDebug).Value = false;
+
                 if (entry != null)
                     entry.Value = changedEntry.Value;
             }
-            NOTFGTools.Instance.GUIUtil.TriggerPendingChanges(false);
+
+            NOTFGTools.Instance.GUIUtil.UpdateActiveEntries(_changedEntries);
             _changedEntries.Clear();
+            NOTFGTools.Instance.GUIUtil.TriggerPendingChanges(false);
         }
 
         public T GetValue<T>(string name)
         {
             var entry = _entries.FirstOrDefault(e => e.InternalName == name);
+
             if (entry == null || entry.Value == null)
                 return default;
 
             if (entry.Value is T value)
                 return value;
 
-            throw new InvalidCastException($"Tried to get type {typeof(T)} of value {name} but value's type is {entry.Value.GetType()}");
+            throw new InvalidCastException($"Value {name} have type {entry.Value.GetType()} but we tried to get is as {typeof(T)}");
+        }
+
+        public void ResetSettings()
+        {
+            LoadConfig(true);
+            NOTFGTools.Instance.GUIUtil.UpdateActiveEntries();
+            _changedEntries.Clear();
+            NOTFGTools.Instance.ApplyChanges();
+            NOTFGTools.Instance.GUIUtil.TriggerPendingChanges(false);
         }
 
 
-        public MenuEntry GetEntry(string name)
+        public MenuEntry TryGetEntry(string internalName)
         {
-            return _entries.FirstOrDefault(e => e.InternalName == name);
+            return _entries.FirstOrDefault(e => e.InternalName == internalName);
         }
 
         public List<MenuEntry> GetAllEntries() => _entries;

@@ -1,4 +1,5 @@
 ﻿using FG.Common.CMS;
+using MelonLoader;
 using Newtonsoft.Json;
 using NOTFGT.Logic;
 using System;
@@ -6,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using UnityEngine;
 using static MPG.Utility.MPGMonoBehaviour;
@@ -38,22 +40,25 @@ namespace NOTFGT.Localization
 
             string result = value.Value;
 
-            foreach (System.Text.RegularExpressions.Match match in System.Text.RegularExpressions.Regex.Matches(result, linkDef))
+            foreach (Match match in Regex.Matches(result, linkDef))
             {
                 var refKey = match.Groups[1].Value;
                 var value_2 = LangEntries.Find(x => x.Key == refKey);
 
                 if (value_2 != null)
                     result = result.Replace(match.Value, value_2.Value);
-                
                 else
                     result = result.Replace(match.Value, $"MISSING: {refKey}");
-                
             }
 
             if (format != null)
-                result = string.Format(result, format);
-
+            {
+                int waitingForFormat = Regex.Matches(result, @"\{\d+\}").Count;
+                if (format.Length == waitingForFormat)
+                    result = string.Format(result, format);
+                else
+                    MelonLogger.Warning($"Tried to format str {key} with {format.Length} entries while string expected {waitingForFormat}");
+            }
             return result;
         }
     }

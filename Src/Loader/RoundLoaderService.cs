@@ -84,6 +84,11 @@ namespace NOTFGT.Loader
         {
             if (RoundLoadingAllowed)
             {
+                if (NOTFGTools.Instance.ActivePlayerState == NOTFGTools.PlayerState.RealGame)
+                {
+                    InternalTools.DoModal(LocalizationManager.LocalizedString("error_round_loader_generic"), LocalizationManager.LocalizedString("error_round_loader_real_game"), UIModalMessage.ModalType.MT_OK, UIModalMessage.OKButtonType.Default);
+                    return;
+                }
                 RoundLoadingAllowed = false;
                 try
                 {
@@ -91,7 +96,7 @@ namespace NOTFGT.Loader
                         SetNewRound(CMSLoader.Instance.CMSData.Rounds[roundToFind]);
                     else
                     {
-                        InternalTools.DoModal(LocalizationManager.LocalizedString("error_round_loader_generic"), LocalizationManager.LocalizedString("error_round_loader_generic", [roundToFind]), UIModalMessage.ModalType.MT_OK, UIModalMessage.OKButtonType.Default);
+                        InternalTools.DoModal(LocalizationManager.LocalizedString("error_round_loader_generic"), LocalizationManager.LocalizedString("error_round_loader_generic_desc", [roundToFind]), UIModalMessage.ModalType.MT_OK, UIModalMessage.OKButtonType.Default);
                         RoundLoadingAllowed = true;
                         return;
                     }
@@ -116,6 +121,7 @@ namespace NOTFGT.Loader
                     CurrentRound.GameRules.TimerVisibilityThreshold = 9999;
                     NetworkGameData.ClearCurrentGameOptions();
                     GlobalGameStateClient.Instance.ResetGame();
+
                     if (mode == LoadSceneMode.Additive)
                         Addressables.LoadScene(CurrentRound.GetSceneName(), LoadSceneMode.Additive);
                     else
@@ -144,11 +150,7 @@ namespace NOTFGT.Loader
         public void StartLoadingScreen()
         {
             var mmManager = Resources.FindObjectsOfTypeAll<MainMenuManager>().FirstOrDefault();
-            try
-            {
-                AudioMixing.Instance.ResetAllSnapshotParams();
-            }
-            catch { };
+            try{AudioMixing.Instance.ResetAllSnapshotParams();} catch { };
 
             if (mmManager == null)
                 return;
@@ -163,16 +165,20 @@ namespace NOTFGT.Loader
             catch { }
         }
 
+        void OnSpawnFail(Exception e) => InternalTools.DoModal(LocalizationManager.LocalizedString("generic_error_title"), $"{LocalizationManager.LocalizedString("error_fallguy_spawn", [InternalTools.FormatException(e)])}", UIModalMessage.ModalType.MT_OK, UIModalMessage.OKButtonType.Default);
+
         public void SpawnFallGuy()
         {
             try
             {
                 int playerTeam = Random.Range(0, CGM.GameRules.NumTeamsWanted());
                 FallGuysCharacterController fgobj = Resources.FindObjectsOfTypeAll<FallGuysCharacterController>().ToList().Find(x => x.name == "FallGuy");
- 
-                if (fgobj == null)
-                    return;
 
+                if (fgobj == null)
+                {
+                    OnSpawnFail(null);
+                    return;
+                }
                 MultiplayerStartingPosition randPos;
 
                 randPos = CGM.GameRules.PickStartingPosition(FallGuyBehaviour.PeakId, 0, playerTeam, 0, false);
@@ -214,12 +220,10 @@ namespace NOTFGT.Loader
                     CGM.CreateTeams(CGM.GameRules.NumTeamsWanted());
                 }
                 CGM.HandlePlayerBeingSpawned(fgcc.NetObject, FallGuyBehaviour.PeakId, GlobalGameStateClient.Instance.GetLocalClientNetworkID(), GlobalGameStateClient.Instance.GetLocalClientAccountID(), ClientBuildDetails.Platform, GlobalGameStateClient.Instance.PlayerProfile.PlatformAccountName, GlobalGameStateClient.Instance.PlayerProfile.PlatformAccountName, 0, fgb.PlayerTeamId, "0", 0, true, GlobalGameStateClient.Instance.PlayerProfile.CustomisationSelections);
-                //CGM.AddPlayerIdentification("102", "android", fgcc, true, "", 0);
-                //CGM._netObjectManager.AddNetworkAwareness(fgcc.gameObject, mpgfg.NetID, true, EnumSpawnObjectType.PLAYER, LodController.LodControllerBehaviour.Default, false, false, FallGuyBehaviour.PeakId);
             }
             catch (Exception e)
             {
-                //FailedPopup(e, forceLeaveToMenu: true, displayOnlyError: false);
+                OnSpawnFail(e); 
             }
         }
 

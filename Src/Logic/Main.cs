@@ -14,10 +14,13 @@ using NOTFGT.Localization;
 using System;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using UnhollowerRuntimeLib;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using static FG.Common.CommonEvents;
 using static FG.Common.GameStateMachine;
+using static FGClient.GlobalGameStateClient;
 using static GameStateEvents;
 using static MelonLoader.MelonLogger;
 
@@ -68,6 +71,8 @@ namespace NOTFGT.Logic
         EventSystem.Handle IntroStart = null;
         EventSystem.Handle IntroEnd = null;
         EventSystem.Handle GuiInit = null;
+        EventSystem.Handle OnSpectator = null;
+        EventSystem.Handle OnRoundOver = null;
 
         public static bool CaptureTools { get { return Instance.SettingsMenu.GetValue<bool>(ToolsMenu.UseCaptureTools); } }
 
@@ -75,7 +80,7 @@ namespace NOTFGT.Logic
         public override void OnInitializeMelon()
         {
             Msg("Startup...");
-
+            
             try
             {
                 MainDir = Path.Combine(Application.persistentDataPath, "NOT_FGTools/");
@@ -89,13 +94,14 @@ namespace NOTFGT.Logic
 
                 GUIUtil.Register();
 
-                SettingsMenu.LoadConfig();
+                SettingsMenu.LoadConfig(false);
 
-                Msg("Common setup.");
                 ClassInjector.RegisterTypeInIl2Cpp<FallGuyBehaviour>();
 
-                this.HarmonyInstance.PatchAll(typeof(HarmonyPatches.CaptureTools));
-                this.HarmonyInstance.PatchAll(typeof(HarmonyPatches.GUITweaks));
+                Msg("Starting common setup.");
+
+                HarmonyInstance.PatchAll(typeof(HarmonyPatches.CaptureTools));
+                HarmonyInstance.PatchAll(typeof(HarmonyPatches.GUITweaks));
 
                 if (SettingsMenu.GetValue<bool>(ToolsMenu.TrackGameDebug))
                 {
@@ -107,6 +113,8 @@ namespace NOTFGT.Logic
                 IntroStart = Broadcaster.Instance.Register<IntroCameraSequenceStartedEvent>(new Action<IntroCameraSequenceStartedEvent>(OnIntroStart));
                 IntroEnd = Broadcaster.Instance.Register<IntroCameraSequenceEndedEvent>(new Action<IntroCameraSequenceEndedEvent>(OnIntroEnd));
                 GuiInit = Broadcaster.Instance.Register<InitialiseClientOverlayEvent>(new Action<InitialiseClientOverlayEvent>(OnGUIInit));
+                OnSpectator = Broadcaster.Instance.Register<ClientGameManagerSpectatorModeChanged>(new Action<ClientGameManagerSpectatorModeChanged>(OnSpectatorEvent));
+                OnRoundOver = Broadcaster.Instance.Register<OnRoundOver>(new Action<OnRoundOver>(OnRoundOverEvent));
 
                 HandlePlayerState(PlayerState.Loading);
 
@@ -128,11 +136,15 @@ namespace NOTFGT.Logic
         void OnGameplayBegin(IntroCountdownEndedEvent evt)
         {
             playersHidden = false;
+#if CHEATS
             SetupFGCCData();
             RollFGCCSettings();
+#endif
             GUIUtil.UpdateGPUI(true, false);
+
             if (ActivePlayerState == PlayerState.RoundLoader)
             {
+                FallGuyBehaviour.FGBehaviour.LoadGPActions();
                 RoundLoader.RoundLoadingAllowed = true;
                 FallGuyBehaviour.FGBehaviour.FallGuy.GetComponent<Rigidbody>().isKinematic = false;
                 FallGuyBehaviour.FGBehaviour.spawnpoint = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -140,11 +152,18 @@ namespace NOTFGT.Logic
                 FallGuyBehaviour.FGBehaviour.spawnpoint.name = "Checkpoint";
                 FallGuyBehaviour.FGBehaviour.spawnpoint.transform.SetPositionAndRotation(FallGuyBehaviour.FGBehaviour.FallGuy.transform.position, FallGuyBehaviour.FGBehaviour.FallGuy.transform.rotation);
             }
+            else
+            {
+                //something for future
+                GUIUtil.UpdateGPActions(null);
+            }
         }
 
         void OnIntroStart(IntroCameraSequenceStartedEvent evt)
         {
+#if CHEATS
             ResetFGCCData();
+#endif
             GlobalGameStateClient.Instance.GameStateView.GetCharacterDataMonitor()._timeToRunNextCharacterControllerDataCheck = float.MaxValue;
             if (ActivePlayerState == PlayerState.RoundLoader)
             {
@@ -154,34 +173,33 @@ namespace NOTFGT.Logic
 
         void OnIntroEnd(IntroCameraSequenceEndedEvent evt)
         {
-            if (ActivePlayerState == PlayerState.RoundLoader)
-            {
-                var gameLoading = RoundLoaderService.GameLoading;
-                if (RoundLoaderService.CGM != null)
-                {
-                    gameLoading.SetPlayerReadyIfNecessary();
-                    if (RoundLoaderService.CGM.CameraDirector != null && RoundLoaderService.CGM.CameraDirector.IsUsingIntroShots)
-                        gameLoading._clientGameManager.CameraDirector.UseCloseShot();
-                    gameLoading._clientGameManager.FinishPreparationPhase();
-                }
-                RoundLoaderService.UIM = gameLoading._clientGameManager._inGameUiManager;
-                gameLoading._clientGameManager.FinishPreparationPhase();
-                Resources.FindObjectsOfTypeAll<PhysicsSimulator>().FirstOrDefault().ToggleRunningPhysicsAutomatically();
-                gameLoading._clientGameManager.SetReady(PlayerReadinessState.IntroComplete, null, null);
-                RoundLoader.RoundCamera?.SnapCameraNextFrame();
-                RoundLoader.RoundCamera?.ForceRecenterToHeading();
-                RoundLoader.RoundCamera?.AddCloseCameraTarget(FallGuyBehaviour.FGBehaviour.FallGuy, true);
-                FallGuyBehaviour.FGBehaviour.FGCC.SetupOnClient(GlobalGameStateClient.Instance.NetObjectManager, FallGuyBehaviour.FGBehaviour.FGMPG);
-                RoundLoaderService.UIM.SwitchToState(InGameUiManager.InGameState.Countdown);
-                RoundLoaderService.CGM._gameSession.SetSessionState(GameSession.SessionState.Countdown);
-                RoundLoaderService.UIM._inGameCountdownState._countdownViewModel.PlayAnimation();
-                SpeedBoostManager SPM = FallGuyBehaviour.FGBehaviour.FGCC.SpeedBoostManager;
-                SPM.SetAuthority(true);
-                SPM.SetCharacterController(FallGuyBehaviour.FGBehaviour.FGCC);
-                Resources.FindObjectsOfTypeAll<XRayMeshRendererTracker>().FirstOrDefault().AddXRayControllerForCharacter(FallGuyBehaviour.FGBehaviour.FGCC);
-                RoundLoader.RoundLoadingAllowed = true;
-                RoundLoaderService.GameLoading.HandleGameServerStartGame(new GameMessageServerStartGame(0, RoundLoaderService.CGM.CurrentGameSession.EndRoundTime, 0, 1, RoundLoaderService.CGM.GameRules.NumPerVsGroup, 1, 0));
-            }
+            if (RoundLoaderService.CGM == null || ActivePlayerState != PlayerState.RoundLoader)
+                return;
+
+            var gameLoading = RoundLoaderService.GameLoading;
+            gameLoading.SetPlayerReadyIfNecessary();
+            if (RoundLoaderService.CGM.CameraDirector != null && RoundLoaderService.CGM.CameraDirector.IsUsingIntroShots)
+                gameLoading._clientGameManager.CameraDirector.UseCloseShot();
+            gameLoading._clientGameManager.FinishPreparationPhase();
+
+            RoundLoaderService.UIM = gameLoading._clientGameManager._inGameUiManager;
+            gameLoading._clientGameManager.FinishPreparationPhase();
+            Resources.FindObjectsOfTypeAll<PhysicsSimulator>().FirstOrDefault().ToggleRunningPhysicsAutomatically();
+            gameLoading._clientGameManager.SetReady(PlayerReadinessState.IntroComplete, null, null);
+            RoundLoader.RoundCamera?.SnapCameraNextFrame();
+            RoundLoader.RoundCamera?.ForceRecenterToHeading();
+            RoundLoader.RoundCamera?.AddCloseCameraTarget(FallGuyBehaviour.FGBehaviour.FallGuy, true);
+            FallGuyBehaviour.FGBehaviour.FGCC.SetupOnClient(GlobalGameStateClient.Instance.NetObjectManager, FallGuyBehaviour.FGBehaviour.FGMPG);
+            RoundLoaderService.UIM.SwitchToState(InGameUiManager.InGameState.Countdown);
+            RoundLoaderService.CGM._gameSession.SetSessionState(GameSession.SessionState.Countdown);
+            RoundLoaderService.UIM._inGameCountdownState._countdownViewModel.PlayAnimation();
+            SpeedBoostManager SPM = FallGuyBehaviour.FGBehaviour.FGCC.SpeedBoostManager;
+            SPM.SetAuthority(true);
+            SPM.SetCharacterController(FallGuyBehaviour.FGBehaviour.FGCC);
+            Resources.FindObjectsOfTypeAll<XRayMeshRendererTracker>().FirstOrDefault().AddXRayControllerForCharacter(FallGuyBehaviour.FGBehaviour.FGCC);
+            RoundLoader.RoundLoadingAllowed = true;
+            RoundLoaderService.GameLoading.HandleGameServerStartGame(new GameMessageServerStartGame(0, RoundLoaderService.CGM.CurrentGameSession.EndRoundTime, 0, 1, RoundLoaderService.CGM.GameRules.NumPerVsGroup, 1, 0));
+
         }
 
         void OnGUIInit(InitialiseClientOverlayEvent evt)
@@ -207,6 +225,20 @@ namespace NOTFGT.Logic
 
                 gameLoading.OnServerRequestStartIntroCameras();
             }
+        }
+
+        void OnSpectatorEvent(ClientGameManagerSpectatorModeChanged evt)
+        {
+#if CHEATS
+            ForceUnHidePlayers();
+#endif
+        }
+
+        void OnRoundOverEvent(OnRoundOver evt)
+        {
+#if CHEATS
+            ForceUnHidePlayers();
+#endif
         }
 
         public void LoadRound(string roundId)
@@ -339,10 +371,10 @@ namespace NOTFGT.Logic
                 File.WriteAllText(a, allLogs);
             }
         }
-
+#if CHEATS
         public void SetupFGCCData()
         {
-#if CHEATS
+
             ActiveFGCCData = Resources.FindObjectsOfTypeAll<CharacterControllerData>().FirstOrDefault();
 
             if (ActiveFGCCData != null && DefaultFGCCData == null)
@@ -355,12 +387,10 @@ namespace NOTFGT.Logic
                 DefaultFGCCData[4] = ActiveFGCCData.diveForce;
                 DefaultFGCCData[5] = ActiveFGCCData.airDiveForce;
             }
-#endif
-        }
+    }
 
         void ResetFGCCData()
         {
-#if CHEATS
             if (ActiveFGCCData != null && DefaultFGCCData != null)
             {
                 ActiveFGCCData.normalMaxSpeed = (float)DefaultFGCCData[0];
@@ -370,12 +400,9 @@ namespace NOTFGT.Logic
                 ActiveFGCCData.diveForce = (float)DefaultFGCCData[4];
                 ActiveFGCCData.airDiveForce = (float)DefaultFGCCData[5];
             }
-#endif
-        }
-
+    }
         public void RollFGCCSettings()
         {
-#if CHEATS
             var player = Resources.FindObjectsOfTypeAll<FallGuysCharacterController>().ToList().Find(a => a.IsLocalPlayer == true);
             if (player != null)
             {
@@ -396,10 +423,9 @@ namespace NOTFGT.Logic
 
                 motorAgent.GetMotorFunction<MotorFunctionJump>()._jumpForce = ActiveFGCCData.jumpForceUltimateParty;
             }
-#endif
         }
 
-#if CHEATS
+
         public void TeleportToFinish()
         {
             if (!DefaultCheck())
@@ -416,7 +442,7 @@ namespace NOTFGT.Logic
             player.transform.SetPositionAndRotation(finish.transform.position + new Vector3(0, 10f, 0), finish.transform.rotation);
         }
 
-        public void ToSafeZone()
+        public void TeleportToSafeZone()
         {
             if (!DefaultCheck())
                 return;
@@ -451,13 +477,7 @@ namespace NOTFGT.Logic
             playersHidden = !playersHidden;
             var players = Resources.FindObjectsOfTypeAll<FallGuysCharacterController>().ToList().FindAll(a => a.IsLocalPlayer == false);
             foreach (var player in players)
-                player.gameObject.SetActive(playersHidden);
-        }
-
-       
-
-        public override void OnSceneWasLoaded(int buildIndex, string sceneName)
-        {
+                player.gameObject.SetActive(!playersHidden);
         }
 
         bool DefaultCheck()
@@ -475,6 +495,14 @@ namespace NOTFGT.Logic
             
             return true;
         }
+
+        void ForceUnHidePlayers()
+        {
+            playersHidden = false;
+            var players = Resources.FindObjectsOfTypeAll<FallGuysCharacterController>().ToList().FindAll(a => a.IsLocalPlayer == false);
+            foreach (var player in players)
+                player.gameObject.SetActive(!playersHidden);
+        }
 #endif
 
         public void ForceMainMenu()
@@ -488,9 +516,17 @@ namespace NOTFGT.Logic
         {
             if (SettingsMenu.GetValue<bool>(ToolsMenu.GUI))
             {
-                UnityEngine.GUI.Box(new Rect(10f, guiPosBase + 10, 250f, 70), "");
-                UnityEngine.GUI.Label(new Rect(15f, guiPosBase + 15, 255f, 30f), "<b>DEBUG</b>");
-                UnityEngine.GUI.Label(new Rect(15f, guiPosBase + 40, 255f, 50f), $"Active state: {ActivePlayerState}\nPrev state: {PreviousPlayerState}");
+                var debugLabel = 
+                $"<b>DEBUG</b>\n\n" +
+                $"Active state: {ActivePlayerState}\n" + 
+                $"Prev state: {PreviousPlayerState}\n" +
+                $"Version: {BuildInfo.Version}\n" +
+                $"Game Version: {Application.version}";
+                var size = UnityEngine.GUI.skin.label.CalcSize(new(debugLabel));
+
+                UnityEngine.GUI.Box(new Rect(10f, guiPosBase + 10, size.x + 10f, size.y + 10f), "");
+                UnityEngine.GUI.Label(new Rect(15f, guiPosBase + 15, size.x + 10f, size.y + 10f), debugLabel);
+            
             }
 
             if (SettingsMenu.GetValue<bool>(ToolsMenu.Watermark)) 

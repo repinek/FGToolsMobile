@@ -38,7 +38,7 @@ namespace NOTFGT.Loader
             FallGuy = gameObject;
             FGCC = gameObject.GetComponent<FallGuysCharacterController>();
             FGMPG = gameObject.GetComponent<MPGNetObject>();
-         
+
             gamemodeType = RoundLoaderService.CGM._round.Archetype.Id.Split('_')[1];
             var vfxplayer = gameObject.GetComponent<FallGuyVFXController>();
             vfxplayer.InjectCameraScreenController(Resources.FindObjectsOfTypeAll<CameraScreenVFXController>().Last());
@@ -48,7 +48,16 @@ namespace NOTFGT.Loader
         public void Init()
         {
             CalculateRespawnPos();
-            NOTFGTools.Instance.GUIUtil.UpdateGPButtonActions([RespawnPlayer, Checkpoint]);
+        }
+
+        public void LoadGPActions()
+        {
+            NOTFGTools.Instance.GUIUtil.UpdateGPActions(new()
+            {
+                { RespawnPlayer, "Respawn" },
+                { Checkpoint, "Checkpoint" },
+                { ResetCheckpointPos, "Reset Checkpoint" },
+            });
         }
 
         void PreFixObstacles()
@@ -75,7 +84,7 @@ namespace NOTFGT.Loader
 
         void OnDestroy()
         {
-            NOTFGTools.Instance.GUIUtil.UpdateGPButtonActions(null);
+            NOTFGTools.Instance.GUIUtil.UpdateGPActions(null);
         }
 
         void RespawnPlayer()
@@ -90,6 +99,13 @@ namespace NOTFGT.Loader
         {
             spawnpoint.transform.position = FallGuy.transform.position + new Vector3(0f, 1f, 0f);
             FallGuy.GetComponent<FallGuysCharacterController>().CharacterEventSystem.RaiseEvent(FGEventFactory.GetVfxCheckpointEvent());
+        }
+
+        void ResetCheckpointPos()
+        {
+            var list = Resources.FindObjectsOfTypeAll<MultiplayerStartingPosition>().ToList();
+            var pos = list[UnityEngine.Random.Range(0, list.Count)];
+            spawnpoint.transform.SetPositionAndRotation(pos.transform.position, pos.transform.rotation);    
         }
 
         void Update()

@@ -61,6 +61,8 @@
 # FAQ
 ### Can I use this on Emulator?
 - LemonLoader doesn't have official emulator support but you can try
+### Will i get banned for this?
+- LemonLoader doesn't have official emulator support but you can try
 
 # Credits
 - Made using [LemonLoader](https://github.com/LemonLoader/MelonLoader_057)

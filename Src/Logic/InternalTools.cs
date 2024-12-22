@@ -62,6 +62,9 @@ namespace NOTFGT.Logic
 
         public static string FormatException(Exception ex)
         {
+            if (ex == null)
+                return string.Empty;
+
             return LocalizationManager.LocalizedString("generic_exception", [ex.Message, ex.StackTrace]);
         }
 

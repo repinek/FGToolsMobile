@@ -47,7 +47,7 @@
     { "Key": "cheat_entry_dive_force_title", "Value": "Dive Force" },
     { "Key": "cheat_entry_dive_force_desc", "Value": "" },
     { "Key": "cheat_entry_air_dive_force_title", "Value": "Dive Force (IN AIR)" },
-    { "Key": "cheat_entry_gair_dive_force_desc", "Value": "" },
+    { "Key": "cheat_entry_air_dive_force_desc", "Value": "" },
     { "Key": "cheat_entry_to_finish_title", "Value": "Teleport To Finish (RACE)" },
     { "Key": "cheat_entry_to_finish_desc", "Value": "" },
     { "Key": "cheat_entry_to_random_player_title", "Value": "Teleport To Random Player" },
@@ -80,5 +80,12 @@
     { "Key": "cheat_entry_force_menu_title", "Value": "Force Load Main Menu" },
     { "Key": "cheat_entry_force_menu_desc", "Value": "reload game into main menu, use this if you softlocked..." },
     { "Key": "cheat_entry_fg_debug_scale_title", "Value": "FG Debug Scale" },
-    { "Key": "cheat_entry_fg_debug_scale_desc", "Value": "" }
+    { "Key": "cheat_entry_fg_debug_scale_desc", "Value": "" },
+    { "Key": "delete_config_alert_title", "Value": "DELETE CONFIG?" },
+    { "Key": "delete_config_alert_desc", "Value": "This will reset all config values to default ones\nYour game will be closed." },
+    { "Key": "error_ruond_loader_real_game", "Value": "You can't load rounds while you're in online game. Leave to menu first" },
+    { "Key": "error_fallguy_spawn", "Value": "Fall Guy spawn failed.\n\n{0}" },
+    { "Key": "generic_error_title", "Value": "ERROR" },
+    { "Key": "reset_config_alert_title", "Value": "RESET TO DEFAULTS?" },
+    { "Key": "reset_config_alert_desc", "Value": "All changes that was made will be lost." }
 ]

@@ -21,10 +21,9 @@ namespace NOTFGT.GUI
 {
 
     [AttributeUsage(AttributeTargets.Field)]
-    public class GUIReferenceAttribute : Attribute
+    public class GUIReferenceAttribute(string target) : Attribute
     {
-        public string Name { get; }
-        public GUIReferenceAttribute(string target) => Name = target;
+        public string Name { get; } = target;
     }
 
     public class GUI_LogEntry
@@ -39,7 +38,7 @@ namespace NOTFGT.GUI
     {
         const string BundleName = "not_fgtoolsgui";
 
-        const string GitHub = "github.com/floyzi";
+        const string GitHub = "github.com/floyzi/FGToolsMobile/";
         const string Discord = "discord.gg/PEysxvSE3x";
         const string Twitter = "twitter.com/@floyzi102";
 
@@ -95,7 +94,7 @@ namespace NOTFGT.GUI
         [GUIReference("RoundListCleanup")] readonly Button CleanupList;
         [GUIReference("RoundsDropDown")] readonly Dropdown RoundsDropdown;
         [GUIReference("RoundsIDSDropDown")] readonly Dropdown IdsDropdown;
-        [GUIReference("ClickToCopyNote")] readonly Text ClickToCopy;
+        [GUIReference("ClickToCopyNote")] readonly GameObject ClickToCopy;
 
         [GUIReference("LogMessage")] readonly Button LogPrefab;
         [GUIReference("LogInfo")] readonly Text LogInfo;
@@ -109,11 +108,9 @@ namespace NOTFGT.GUI
         [GUIReference("OpenGPPanel")] readonly Button OpenGP;
         [GUIReference("HideGPPanel")] readonly Button HideGP;
 
-        [GUIReference("InRoundLoader")] readonly GameObject GPRoundLoader;
-        [GUIReference("InRealGame")] readonly GameObject GPRealGame;
-
-        [GUIReference("RespawnButton")] readonly Button Respawn;
-        [GUIReference("CheckpointButton")] readonly Button Checkpoint;
+        [GUIReference("GPActions")] readonly GameObject GPActionsObject;
+        [GUIReference("GPActionsView")] readonly Transform GPActionsView;
+        [GUIReference("GPButtonPrefab")] readonly Button GPBtn;
 
         [GUIReference("BTN_Discord")] readonly Button DiscordBtn;
         [GUIReference("BTN_Twitter")] readonly Button TwitterBtn;
@@ -127,6 +124,10 @@ namespace NOTFGT.GUI
 
         readonly List<GUI_LogEntry> LogEntries = [];
 
+        readonly List<Transform> GameplayActions = [];
+
+        readonly List<GameObject> EntryInstances = [];
+
         EventSystem.Handle _menuDisplayed;
 
         string BundlePath;
@@ -134,8 +135,11 @@ namespace NOTFGT.GUI
 
         bool HasGUIKilled = false;
         bool SuceedGUISetup = false;
+        bool WasInMenu = false;
         bool OnRepairScreen { get { return RepairStyle.gameObject != null && RepairStyle.gameObject.activeSelf; } }
         bool AllowGUIActions { get { return GUI_Bundle != null && GUIObject != null; } }
+
+        Action LastFailModal;
 
 
         public void ShowRepairGUI(Exception EX)
@@ -163,8 +167,7 @@ namespace NOTFGT.GUI
             _menuDisplayed = Broadcaster.Instance.Register<OnMainMenuDisplayed>(new Action<OnMainMenuDisplayed>(MenuEvent));
 
             MelonLogger.Msg($"[{base.GetType()}] Successful GUI_Util register. Is bundle loaded: {GUI_Bundle != null}");
-            if (GUI_Bundle != null)
-                TryToLoadGUI();
+            TryToLoadGUI();
         }
 
         public void ProcessNewLog(GUI_LogEntry logEntry)
@@ -221,6 +224,11 @@ namespace NOTFGT.GUI
 
         void MenuEvent(OnMainMenuDisplayed evt)
         {
+            if (LastFailModal != null)
+            {
+                LastFailModal.Invoke();
+            }
+
             if (OnRepairScreen || HasGUIKilled)
                 return;
 
@@ -236,7 +244,13 @@ namespace NOTFGT.GUI
                     SaveSettings();
                 }
                 NOTFGTools.Instance.HandlePlayerState(NOTFGTools.PlayerState.Menu);
-                InternalTools.DoModal(LocalizationManager.LocalizedString("welcome_title", [BuildInfo.Name]), LocalizationManager.LocalizedString("welcome_desc", new object[] { BuildInfo.Name }), FGClient.UI.UIModalMessage.ModalType.MT_OK, FGClient.UI.UIModalMessage.OKButtonType.Default, new Action<bool>(toggle));
+
+                if (!WasInMenu)
+                    InternalTools.DoModal(LocalizationManager.LocalizedString("welcome_title", [BuildInfo.Name]), LocalizationManager.LocalizedString("welcome_desc", new object[] { BuildInfo.Name }), FGClient.UI.UIModalMessage.ModalType.MT_OK, FGClient.UI.UIModalMessage.OKButtonType.Default, new Action<bool>(toggle));
+                else
+                    toggle(true);
+
+                WasInMenu = true;
             }
             catch (Exception e)
             {
@@ -267,7 +281,7 @@ namespace NOTFGT.GUI
                     LogEntries.Clear();
                     UpdateLogStatsText();
                 }));
-                applyChanges.onClick.AddListener(new Action(() => { SaveSettings(); }));
+                applyChanges.onClick.AddListener(new Action(SaveSettings));
                 UnHideButton.onClick.AddListener(new Action(() => { ToggleGUI(GUIHideState.Active); }));
                 HideButton.onClick.AddListener(new Action(() => { ToggleGUI(GUIHideState.Hidden); }));
                 KillButton.onClick.AddListener(new Action(() =>
@@ -283,25 +297,26 @@ namespace NOTFGT.GUI
                 }));
                 CleanupList.onClick.AddListener(new Action(() =>
                 {
-                    ClickToCopy.gameObject.SetActive(false);
+                    ClickToCopy.SetActive(false);
                     CleanupScreen(RoundIdsView, true);
                 }));
                 RoundGenerateListButton.onClick.AddListener(new Action(() =>
                 {
+                    ClickToCopy.SetActive(false);
                     CleanupScreen(RoundIdsView, true);
                     NOTFGTools.Instance.RoundLoader.GenerateCMSList(RoundIdsView, RoundIDEntryV2);
-                    ClickToCopy.gameObject.SetActive(true);
+                    ClickToCopy.SetActive(true);
                 }));
-                RoundLoadRandomButton.onClick.AddListener(new Action(() => { NOTFGTools.Instance.RoundLoader.LoadRandomCms(); }));
+                RoundLoadRandomButton.onClick.AddListener(new Action(NOTFGTools.Instance.RoundLoader.LoadRandomCms));
                 DiscordBtn.onClick.AddListener(new Action(() => { Application.OpenURL($"https://{Discord}"); }));
                 TwitterBtn.onClick.AddListener(new Action(() => { Application.OpenURL($"https://{Twitter}"); }));
                 GitHubBtn.onClick.AddListener(new Action(() => { Application.OpenURL($"https://{GitHub}"); }));
                 HideGP.onClick.AddListener(new Action(() => { UpdateGPUI(true, false); }));
                 OpenGP.onClick.AddListener(new Action(() => { UpdateGPUI(true, true); }));
                 deleteConfig.onClick.AddListener(new Action(() => {
-                    InternalTools.DoModal(LocalizationManager.LocalizedString("delete_config_alert_title"), LocalizationManager.LocalizedString("delete_config_alert_desc"), FGClient.UI.UIModalMessage.ModalType.MT_OK_CANCEL, FGClient.UI.UIModalMessage.OKButtonType.Disruptive, new Action<bool>((val) => {
+                    InternalTools.DoModal(LocalizationManager.LocalizedString("reset_config_alert_title"), LocalizationManager.LocalizedString("reset_config_alert_desc"), FGClient.UI.UIModalMessage.ModalType.MT_OK_CANCEL, FGClient.UI.UIModalMessage.OKButtonType.Disruptive, new Action<bool>((val) => {
                         if (val)
-                            NOTFGTools.Instance.SettingsMenu.DeleteConfig();
+                            NOTFGTools.Instance.SettingsMenu.ResetSettings();
                     } ));
                 
                 }));
@@ -311,28 +326,28 @@ namespace NOTFGT.GUI
                 ConfigureTabs();
                 CreateConfigMenu(configMenu, NOTFGTools.Instance.SettingsMenu.GetAllEntries());
                 InitRoundsDropdown();
+                UpdateLogStatsText();
                 GUIObject.gameObject.SetActive(true);
                 SuceedGUISetup = true;
             }
             catch (Exception e)
             {
-
+                var exstr = InternalTools.FormatException(e);
+                MelonLogger.Msg($"GUI Setup failed. {exstr}");
+                TryTriggerFailedToLoadUIModal(LocalizationManager.LocalizedString("init_fail_setup_exception", [exstr]));
             }
         }
         
         void TryToLoadGUI()
         {
-            if (HasGUIKilled)
-                return;
-
-            if (GUIObject != null)
+            if (HasGUIKilled || GUIObject != null)
                 return;
 
             var assetName = "NOT_FGToolsGUI";
 
             if (GUI_Bundle == null)
             {
-                TriggerFailedToLoadUIModal(LocalizationManager.LocalizedString("init_fail_null_bundle", [BundleName, BundlePath]));
+                TryTriggerFailedToLoadUIModal(LocalizationManager.LocalizedString("init_fail_null_bundle", [BundleName, BundlePath]));
                 return;
             }
 
@@ -340,23 +355,22 @@ namespace NOTFGT.GUI
 
             if (theGUI.asset == null)
             {
-                TriggerFailedToLoadUIModal(LocalizationManager.LocalizedString("init_fail_null_asset", [assetName]));
+                TryTriggerFailedToLoadUIModal(LocalizationManager.LocalizedString("init_fail_null_asset", [assetName]));
                 return;
             }
 
-            var obj2 = GameObject.Instantiate(theGUI.asset);
+            GameObject.Instantiate(theGUI.asset);
             GUIObject = GameObject.Find($"{assetName}(Clone)");
             if (GUIObject != null)
             {
                 GameObject.DontDestroyOnLoad(GUIObject);
                 GUIObject.GetComponent<Canvas>().sortingOrder = 9999;
-                GUIObject.transform.localPosition = new Vector3(GUIObject.transform.position.x + 1000, GUIObject.transform.position.y, GUIObject.transform.position.z);
                 ConfigureObjects();
                 GUIObject.gameObject.SetActive(false);
                 RepairStyle.gameObject.SetActive(false);
             }
             else
-                TriggerFailedToLoadUIModal(LocalizationManager.LocalizedString("init_fail_null_object", new object[] { $"{assetName}(Clone)" }));
+                TryTriggerFailedToLoadUIModal(LocalizationManager.LocalizedString("init_fail_null_object", [$"{assetName}(Clone)"]));
         }
 
         void InitRoundsDropdown()
@@ -384,16 +398,20 @@ namespace NOTFGT.GUI
                 }
 
                 Il2CppSystem.Collections.Generic.List<string> roundNames = new();
+
                 foreach (var round in uniqRounds.Values)
+                {
                     roundNames.Add(round);
+                }
+
                 roundNames.Sort();
                 RoundsDropdown.AddOptions(roundNames);
 
-                IdsDropdown.onValueChanged.AddListener(new Action<int>((val) => {
+                IdsDropdown.onValueChanged.AddListener(new Action<int>(val => {
                     ReadyRound = IdsDropdown.options[val].text;
                 }));
 
-                RoundsDropdown.onValueChanged.AddListener(new Action<int>((val) =>
+                RoundsDropdown.onValueChanged.AddListener(new Action<int>(val =>
                 {
                     var scene = string.Empty;
 
@@ -439,28 +457,45 @@ namespace NOTFGT.GUI
         }
 
 
-        public void UpdateGPButtonActions(Action[] actions = null)
+        public void UpdateGPActions(Dictionary<Action, string> actions = null)
         {
             if (actions != null)
             {
-                Respawn.onClick.AddListener(actions[0]);
-                Checkpoint.onClick.AddListener(actions[1]);
+                foreach (var action in actions)
+                {
+                    GameObject btnPrefab = GameObject.Instantiate(GPBtn.gameObject, GPActionsView);
+                    btnPrefab.SetActive(true);
+                    btnPrefab.name = action.Value;
+
+                    btnPrefab.GetComponentInChildren<Button>().onClick.AddListener(action.Key);
+                    btnPrefab.GetComponentInChildren<Text>().text = action.Value;
+
+                    GameplayActions.Add(btnPrefab.transform);
+                }
             }
             else
-            {
-                Respawn.onClick.RemoveAllListeners();   
-                Checkpoint.onClick.RemoveAllListeners();
+            {     
+                foreach (var trans in GameplayActions)
+                {
+                    GameObject.Destroy(trans.gameObject);
+                }
+                GameplayActions.Clear();
+                UpdateGPUI(false, false);
             }
         }
 
-        void TriggerFailedToLoadUIModal(string addotionalMsg) => InternalTools.DoModal(LocalizationManager.LocalizedString("gui_init_fail_generic_title"), LocalizationManager.LocalizedString("gui_init_fail_generic_desc", [addotionalMsg]), FGClient.UI.UIModalMessage.ModalType.MT_OK, FGClient.UI.UIModalMessage.OKButtonType.Disruptive);
+        void TryTriggerFailedToLoadUIModal(string addotionalMsg)
+        {
+            LastFailModal = (new Action(() => { InternalTools.DoModal(LocalizationManager.LocalizedString("gui_init_fail_generic_title"), LocalizationManager.LocalizedString("gui_init_fail_generic_desc", [addotionalMsg]), FGClient.UI.UIModalMessage.ModalType.MT_OK, FGClient.UI.UIModalMessage.OKButtonType.Disruptive); }));
+        }
 
         void ConfigureObjects()
         {
             var fields = GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic).Where(field => field.GetCustomAttribute<GUIReferenceAttribute>() != null);
+            if (fields == null)
+                return;
 
-            var a = GUIObject.transform.GetComponentsInChildren<Transform>(true);
-            foreach (Transform t in a)
+            foreach (Transform t in GUIObject.transform.GetComponentsInChildren<Transform>(true))
             {
                 foreach (var field in fields)
                 {
@@ -484,8 +519,7 @@ namespace NOTFGT.GUI
 
                         if (component != null)
                         {
-                            try{field.SetValue(this, component);}
-                            catch {}
+                            try{field.SetValue(this, component);} catch {}
                         }
                     }
                 }
@@ -510,8 +544,10 @@ namespace NOTFGT.GUI
 
                     if (tabOfBtn != null)
                     {
-                        btn.onClick.AddListener(new System.Action(click));
-                        void click() => ToggleTab(tabOfBtn, btn);
+                        btn.onClick.AddListener(new Action(() =>
+                        {
+                            ToggleTab(tabOfBtn, btn);
+                        }));
                     }
                 }
             }
@@ -558,17 +594,6 @@ namespace NOTFGT.GUI
             GameplayStyle.SetActive(keepGUIOn);
             GameplayHidden.SetActive(!active);
             GameplayActive.SetActive(active);
-            switch (NOTFGTools.Instance.ActivePlayerState)
-            {
-                case NOTFGTools.PlayerState.RealGame:
-                    GPRoundLoader.SetActive(false);
-                    GPRealGame.SetActive(true);
-                    break;
-                case NOTFGTools.PlayerState.RoundLoader:
-                    GPRoundLoader.SetActive(true);
-                    GPRealGame.SetActive(false);
-                    break;
-            }
         }
 
         void ResetGPUI()
@@ -576,6 +601,49 @@ namespace NOTFGT.GUI
             GameplayActive.SetActive(false);
             GameplayHidden.SetActive(true);
             GameplayStyle.SetActive(false);
+            GameplayActions.Clear();
+        }
+
+        public void UpdateActiveEntries(List<MenuEntry> changed = null)
+        {
+            foreach (GameObject obj in EntryInstances)
+            {
+                var entry = NOTFGTools.Instance.SettingsMenu.TryGetEntry(obj.name);
+                if (entry != null)
+                {
+                    switch (entry.ValueType)
+                    {
+                        case MenuEntry.Type.Bool:
+                            var toggle = obj.GetComponentInChildren<Toggle>();
+                            var tVal = Convert.ToBoolean(entry.Value);
+                            toggle.isOn = tVal;
+                            toggle.onValueChanged.Invoke(tVal);
+                            break;
+                        case MenuEntry.Type.Int:
+                        case MenuEntry.Type.Float:
+                        case MenuEntry.Type.String:
+                            var field = obj.GetComponentInChildren<InputField>();
+                            field.text = entry.Value.ToString();
+                            field.onValueChanged.Invoke(field.text);
+                            break;
+                        case MenuEntry.Type.Slider:
+                            var slider = obj.GetComponentInChildren<Slider>();
+                            entry.Config.TryGetValue(IsFloat, out var isFloat);
+
+                            if ((bool)isFloat)
+                                slider.value = float.Parse(entry.Value.ToString());
+                            else
+                                slider.value = Convert.ToInt32(entry.Value.ToString());
+
+                            slider.onValueChanged.Invoke(slider.value);
+                            break;
+                        case MenuEntry.Type.Button:
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
         }
 
         void CreateConfigMenu(Transform ConfigTransform, List<MenuEntry> configEntries)
@@ -584,6 +652,7 @@ namespace NOTFGT.GUI
 
             foreach (var entry in configEntries.OrderBy(entry => entry.Category).ToList())
             {
+                MelonLogger.Msg($"[{base.GetType()}] CreateConfigMenu() - Creating entry \"{entry}\" with type \"{entry.ValueType}\"");
                 if (!string.IsNullOrEmpty(entry.Category) && !categories.Contains(entry.Category))
                 {
                     GameObject haderInst = GameObject.Instantiate(GUI_HeaderPrefab, ConfigTransform);
@@ -592,12 +661,12 @@ namespace NOTFGT.GUI
 
                     var headerText = haderInst.GetComponentInChildren<Text>();
                     if (headerText != null)
-                        headerText.text = headerText.text.Replace("{0}", LocalizationManager.LocalizedString(entry.Category));
+                        headerText.text = string.Format(headerText.text, LocalizationManager.LocalizedString(entry.Category));
 
                     categories.Add(entry.Category);
                 }
 
-                var entryDesc = LocalizationManager.LocalizedString(entry.Description);
+                var localizedDesc = LocalizationManager.LocalizedString(entry.Description);
 
                 switch (entry.ValueType)
                 {
@@ -610,8 +679,8 @@ namespace NOTFGT.GUI
                         var toggleTitle = toggleInst.transform.Find("Toggle").GetComponentInChildren<Text>();
                         var toggleDesc = toggleInst.transform.Find("FieldDesc").GetComponent<Text>();
 
-                        if (!string.IsNullOrEmpty(entryDesc))
-                            toggleDesc.text = $"*{LocalizationManager.LocalizedString(entryDesc)}";
+                        if (!string.IsNullOrEmpty(localizedDesc))
+                            toggleDesc.text = $"*{localizedDesc}";
                         else
                             toggleDesc.gameObject.SetActive(false);
 
@@ -620,11 +689,12 @@ namespace NOTFGT.GUI
 
                         toggle.isOn = Convert.ToBoolean(entry.Value);
 
-                        toggle.onValueChanged.AddListener(new Action<bool>(act));
-                        void act(bool val)
+                        toggle.onValueChanged.AddListener(new Action<bool>(val =>
                         {
                             NOTFGTools.Instance.SettingsMenu.UpdateValue(entry.InternalName, val);
-                        }
+                        }));
+
+                        EntryInstances.Add(toggleInst);
                         break;
 
                     case MenuEntry.Type.Int:
@@ -638,8 +708,8 @@ namespace NOTFGT.GUI
                         var fieldTitle = fieldInst.transform.Find("FieldTitle").GetComponent<Text>();
                         var fieldDesc = fieldInst.transform.Find("FieldDesc").GetComponent<Text>();
 
-                        if (!string.IsNullOrEmpty(entry.Description))
-                            fieldDesc.text = $"*{LocalizationManager.LocalizedString(entry.Description)}";
+                        if (!string.IsNullOrEmpty(localizedDesc))
+                            fieldDesc.text = $"*{localizedDesc}";
                         else
                             fieldDesc.gameObject.SetActive(false);
 
@@ -647,42 +717,44 @@ namespace NOTFGT.GUI
                             fieldTitle.text = LocalizationManager.LocalizedString(entry.DisplayName);
 
                         inputField.text = entry.Value.ToString();
-                        if (entry.AdditionalData != null && entry.AdditionalData is object[] v)
-                            inputField.characterLimit = Convert.ToInt32(v[0]);
+                        if (entry.Config != null && entry.Config != null && entry.Config.Count == 1)
+                        {
+                            entry.Config.TryGetValue(CharLimit, out var limit);
+                            inputField.characterLimit = Convert.ToInt32(limit.ToString());
+                        }
 
                         if (entry.ValueType == MenuEntry.Type.Int)
                         {
                             inputField.contentType = InputField.ContentType.IntegerNumber;
-                            inputField.onValueChanged.AddListener(new Action<string>(act2));
-                            void act2(string val)
+                            inputField.onValueChanged.AddListener(new Action<string>(val =>
                             {
                                 if (int.TryParse(val, out int intVal))
                                 {
                                     NOTFGTools.Instance.SettingsMenu.UpdateValue(entry.InternalName, intVal);
                                 }
-                            }
+                            }));
                         }
                         else if (entry.ValueType == MenuEntry.Type.Float)
                         {
                             inputField.contentType = InputField.ContentType.DecimalNumber;
-                            inputField.onValueChanged.AddListener(new Action<string>(act3));
-                            void act3(string val)
+                            inputField.onValueChanged.AddListener(new Action<string>(val =>
                             {
                                 if (float.TryParse(val, out float floatVal))
                                 {
                                     NOTFGTools.Instance.SettingsMenu.UpdateValue(entry.InternalName, floatVal);
                                 }
-                            }
+                            }));
                         }
                         else if (entry.ValueType == MenuEntry.Type.String)
                         {
                             inputField.contentType = InputField.ContentType.Standard;
-                            inputField.onValueChanged.AddListener(new Action<string>(act4));
-                            void act4(string val)
+                            inputField.onValueChanged.AddListener(new Action<string>(val => 
                             {
                                 NOTFGTools.Instance.SettingsMenu.UpdateValue(entry.InternalName, val);
-                            }
+                            }));
                         }
+
+                        EntryInstances.Add(fieldInst);
                         break;
                     case MenuEntry.Type.Slider:
                         GameObject sliderInst = GameObject.Instantiate(GUI_SliderPrefab, ConfigTransform);
@@ -693,8 +765,8 @@ namespace NOTFGT.GUI
                         var sliderTitle = sliderInst.transform.Find("SliderTitle").GetComponent<Text>();
                         var sliderDesc = sliderInst.transform.Find("FieldDesc").GetComponent<Text>();
 
-                        if (!string.IsNullOrEmpty(entryDesc))
-                            sliderDesc.text = $"*{entryDesc}";
+                        if (!string.IsNullOrEmpty(localizedDesc))
+                            sliderDesc.text = $"*{localizedDesc}";
                         else
                             sliderDesc.gameObject.SetActive(false);
 
@@ -702,24 +774,45 @@ namespace NOTFGT.GUI
                             sliderTitle.GetComponentInChildren<Text>().text = LocalizationManager.LocalizedString(entry.DisplayName);
 
                         var sliderValue = slider.transform.Find("SliderValue").GetComponent<Text>();
-                        if (entry.AdditionalData != null && entry.AdditionalData is object[] a)
+                        if (entry.Config != null && entry.Config.Count == 3)
                         {
-                            slider.minValue = float.Parse(a[0].ToString());
-                            slider.maxValue = float.Parse(a[1].ToString());
+                            entry.Config.TryGetValue(IsFloat, out var isFloat);
+                            entry.Config.TryGetValue(SliderMin, out var min);
+                            entry.Config.TryGetValue(SliderMax, out var max);
+
+                            if ((bool)isFloat)
+                            {
+                                slider.minValue = float.Parse(min.ToString());
+                                slider.maxValue = float.Parse(max.ToString());
+
+                                slider.value = float.Parse(entry.Value.ToString());
+                                sliderValue.text = $"{entry.Value:F1} / {slider.maxValue:F1}";
+
+                                slider.onValueChanged.AddListener(new Action<float>(val =>
+                                {
+                                    NOTFGTools.Instance.SettingsMenu.UpdateValue(entry.InternalName, val);
+                                    sliderValue.text = $"{val:F1} / {slider.maxValue:F1}";
+                                }));
+                            }
+                            else
+                            {
+                                slider.minValue = Convert.ToInt32(min.ToString());
+                                slider.maxValue = Convert.ToInt32(max.ToString());
+
+                                slider.value = Convert.ToInt32(entry.Value.ToString()); ;
+                                sliderValue.text = $"{Convert.ToInt32(entry.Value)} / {Convert.ToInt32(slider.maxValue)}";
+
+                                slider.onValueChanged.AddListener(new Action<float>(val =>
+                                {
+                                    NOTFGTools.Instance.SettingsMenu.UpdateValue(entry.InternalName, val);
+                                    sliderValue.text = $"{Convert.ToInt32(val)} / {Convert.ToInt32(slider.maxValue)}";
+                                }));
+                            }
                         }
                         else
-                            Debug.LogWarning("");
+                            Debug.LogError($"Can't setup slider {entry.InternalName}. Data is null");
 
-                        slider.value = float.Parse(entry.Value.ToString());
-                        sliderValue.text = $"{entry.Value:F1} / {slider.maxValue:F1}";
-
-
-                        slider.onValueChanged.AddListener(new Action<float>(act5));
-                        void act5(float val)
-                        {
-                            NOTFGTools.Instance.SettingsMenu.UpdateValue(entry.InternalName, val);
-                            sliderValue.text = $"{val:F1} / {slider.maxValue:F1}";
-                        }
+                        EntryInstances.Add(sliderInst);
                         break;
                     case MenuEntry.Type.Button:
                         GameObject buttonInst = GameObject.Instantiate(GUI_ButtonPrefab, ConfigTransform);
@@ -729,8 +822,8 @@ namespace NOTFGT.GUI
                         var button = buttonInst.transform.Find("Button").GetComponent<Button>();
                         var buttonDesc = buttonInst.transform.Find("FieldDesc").GetComponent<Text>();
 
-                        if (!string.IsNullOrEmpty(entryDesc))
-                            buttonDesc.text = $"*{entryDesc}";
+                        if (!string.IsNullOrEmpty(localizedDesc))
+                            buttonDesc.text = $"*{localizedDesc}";
                         else
                             buttonDesc.gameObject.SetActive(false);
 
@@ -740,7 +833,7 @@ namespace NOTFGT.GUI
                             MethodInfo theMethod = typeof(NOTFGTools).GetMethod(entry.Value.ToString());
                             theMethod.Invoke(NOTFGTools.Instance, null);
                         }));
-
+                        EntryInstances.Add(buttonInst);
                         break;
                     default:
                         Debug.LogWarning($"Fallback on: {entry.InternalName}");
