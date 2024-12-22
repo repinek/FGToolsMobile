@@ -67,6 +67,7 @@ namespace NOTFGT.Logic
         bool playersHidden = false;
 
         Action<string, string, LogType> _logAction;
+
         EventSystem.Handle GameplayBegin = null;
         EventSystem.Handle IntroStart = null;
         EventSystem.Handle IntroEnd = null;
