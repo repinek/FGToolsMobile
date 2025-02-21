@@ -68,19 +68,12 @@ namespace NOTFGT.Logic
             return LocalizationManager.LocalizedString("generic_exception", [ex.Message, ex.StackTrace]);
         }
 
-        public static string CleanStr(string strIN, bool rpcFormat = false)
+        public static string CleanStr(string strIN)
         {
             string strOUT = Regex.Replace(strIN, @"<.*?>|\t|\s{2,}", " ");
             strOUT = Regex.Replace(strOUT, @"(?<=<) | (?=>)", "");
             strOUT = strOUT.Trim();
             strOUT = Regex.Replace(strOUT, @"\s+", " ");
-            if (rpcFormat)
-            {
-                string[] words = strOUT.Split(' ');
-                for (int i = 0; i < words.Length; i++)
-                    words[i] = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(words[i].ToLower());
-                strOUT = string.Join(" ", words);
-            }
             return strOUT;
         }
     }

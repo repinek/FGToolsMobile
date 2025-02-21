@@ -43,7 +43,7 @@ namespace NOTFGT.GUI
         public const string JumpYModifier = "JumpYModifier";
         public const string Watermark = "Watermark";
         public const string DiveSens = "DiveSens";
-        public const string DisableMonitorCheck = "DisableMonitorCheck";
+        public static string DisableMonitorCheck => "DisableMonitorCheck";
         public const string ToFinish = "ToFinish";
         public const string DisableAFK = "DisableAFK";
         public const string GravityChange = "GravityChange";

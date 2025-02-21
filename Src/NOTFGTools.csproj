@@ -24,7 +24,7 @@
     <ErrorReport>prompt</ErrorReport>
     <DefineConstants>
     </DefineConstants>
-    <WarningLevel>4</WarningLevel>
+    <WarningLevel>5</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Cheats|AnyCPU'">
     <OutputPath>Output\</OutputPath>

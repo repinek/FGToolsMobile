@@ -32,7 +32,7 @@ namespace NOTFGT.Logic
         public const string Description = "NOT FallGuys level loader by @floyzi102 on twitter";
         public const string Author = "Floyzi";
         public const string Company = null;
-        public const string Version = "1.0.0";
+        public const string Version = "1.0.1";
         public const string DownloadLink = null;
     }
 
