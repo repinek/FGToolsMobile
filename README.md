@@ -67,6 +67,9 @@
 ### My game crashes, what do I do!?
 - If it was the first launch, just open it again <b>and wait around five or ten minutes sitting on black screen!!</b>
 - If the game crashes no matter what then you're out of luck, there is nothing you can do to fix it.
+### Does this thing have cheats?
+- Release versions **NEVER** includeds cheats. If you want to get cheats compile it by yourself
+### Can I use this on Emulator?
 
 # Credits
 - Made using [LemonLoader](https://github.com/LemonLoader/MelonLoader_057)
