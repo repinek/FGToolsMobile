@@ -321,7 +321,7 @@ namespace NOTFGT.GUI
                 
                 }));
                 RoundIDEntry.SetActive(false);
-                Header.text = $"{BuildInfo.Name} V{BuildInfo.Version}";
+                Header.text = $"{BuildInfo.Name} V{BuildInfo.Version} (For {BuildInfo.ForGameVersion})";
                 Slogan.text = $"{BuildInfo.Description}";
                 ConfigureTabs();
                 CreateConfigMenu(configMenu, NOTFGTools.Instance.SettingsMenu.GetAllEntries());

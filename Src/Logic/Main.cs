@@ -33,6 +33,7 @@ namespace NOTFGT.Logic
         public const string Author = "Floyzi";
         public const string Company = null;
         public const string Version = "1.0.1";
+        public static string ForGameVersion = Application.version;
         public const string DownloadLink = null;
     }
 
@@ -309,7 +310,7 @@ namespace NOTFGT.Logic
 
         void WatermarkGUI()
         {
-            string watermark = $"<b>{BuildInfo.Name} V{BuildInfo.Version} {BuildInfo.Description.Substring(BuildInfo.Description.IndexOf("by"))}</b>";
+            string watermark = $"<b>{BuildInfo.Name} V{BuildInfo.Version} (For {BuildInfo.ForGameVersion}) {BuildInfo.Description.Substring(BuildInfo.Description.IndexOf("by"))}</b>";
 
             GUIStyle upper = new(UnityEngine.GUI.skin.label)
             {
@@ -521,7 +522,7 @@ namespace NOTFGT.Logic
                 $"<b>DEBUG</b>\n\n" +
                 $"Active state: {ActivePlayerState}\n" + 
                 $"Prev state: {PreviousPlayerState}\n" +
-                $"Version: {BuildInfo.Version}\n" +
+                $"Version: {BuildInfo.Version} (For {BuildInfo.ForGameVersion})\n" +
                 $"Game Version: {Application.version}";
                 var size = UnityEngine.GUI.skin.label.CalcSize(new(debugLabel));
 
