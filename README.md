@@ -9,11 +9,11 @@
 - Ability to set custom FPS limit
 - FG Debug (FPS counter, network statistics, etc)
 - Unity log tracking
-- Some cheats (never included in the release version)
+- Some cheats ~~(never included in the release version)~~ now included
 
 > # Note
 >
-> - <b>First launch takes up to ten minutes, the game may also crash</b>
+> - ~~<b>First launch takes up to ten minutes, the game may also crash</b>~~ Now the first launch should not take as long as before.
 > - <b>If you don't want to wait for game resources to download, backup the .obb file inside the Android/obb/com.Mediatonic FallGuys_client/ folder, just restore it after installing the APK</b>
 <br><br>
 
@@ -61,16 +61,15 @@
 ### Can I play online with this?
 - Yes!
 ### Can I use this on Emulator?
-- LemonLoader doesn't have official emulator support but you can try it
+- LemonLoader doesn't have official emulator support but you can try it. [Read LemonLoader FAQ](https://github.com/LemonLoader/MelonLoader_057/wiki/FAQ) to enable Emulator Mode
 ### Will I get banned for this?
 - If you're using a version with cheats, probably. If not then you're safe, there's nothing that can ban you
 ### My game crashes, what do I do!?
-- If it was the first launch, just open it again <b>and wait around five or ten minutes sitting on black screen!!</b>
+- If it was the first launch, just open it again ~~<b>and wait around five or ten minutes sitting on black screen!!</b>~~ Now you don't have to wait
 - If the game crashes no matter what then you're out of luck, there is nothing you can do to fix it.
 ### Does this thing have cheats?
-- Release versions **NEVER** includeds cheats. If you want to get cheats compile it by yourself
-### Can I use this on Emulator?
+- ~~Release versions **NEVER** includeds cheats. If you want to get cheats compile it by yourself~~ now included
 
 # Credits
 - Made using [LemonLoader](https://github.com/LemonLoader/MelonLoader_057)
-- [Repinek](https://github.com/repinek) and Toytyis - playtesting
+- [repinek](https://github.com/repinek) and Toytyis - playtesting
