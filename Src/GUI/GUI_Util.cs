@@ -38,7 +38,7 @@ namespace NOTFGT.GUI
     {
         const string BundleName = "not_fgtoolsGUI";
 
-        const string GitHub = "github.com/floyzi/FGToolsMobile/";
+        const string GitHub = "github.com/repinek/FGToolsMobile/";
         const string Discord = "discord.gg/PEysxvSE3x";
         const string Twitter = "twitter.com/@floyzi102";
 
